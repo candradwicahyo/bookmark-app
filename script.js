@@ -15,9 +15,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  function clearForm() {
-    const form = document.querySelector('.form');
-    form.reset();
+  function clear() {
+    const forms = document.querySelectorAll('.form');
+    forms.forEach(form => form.reset());
   }
   
   const btnSubmit = document.querySelector('.btn-submit');
@@ -25,23 +25,27 @@ window.addEventListener('DOMContentLoaded', () => {
   
   function addBookmark() {
     if (modal.textContent.includes('add')) {
-      const nameSites = inputNameSites.value.trim();
-      const urlSites = inputUrlSites.value.trim();
-      if (validate(nameSites, urlSites) == true) {
-        const data = {name: nameSites, url: urlSites};
+      const data = getInputValues();
+      if (validate(data) == true) {
         bookmarks.unshift(data);
         saveBookmark();
-        showUI(data);
         alerts('success', 'Bookmark has been added!');
         loadBookmark();
-        clearForm();
+        clear();
       }
     }
   }
   
+  function getInputValues() {
+    return {
+      name: inputNameSites.value.trim(),
+      url: inputUrlSites.value.trim()
+    };
+  }
+  
   const regexURL = /^[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
   
-  function validate(name, url) {
+  function validate({ name, url }) {
     if (!name && !url) return alerts('error', 'All input is empty!');
     if (!name || !url) return alerts('error', 'Input is empty!');
     if (name.length > 20) return alerts('error', 'input name sites must be less then 20 character!');
@@ -54,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('bookmark-app', JSON.stringify(bookmarks));
   }
   
-  function showUI(data, index = 0) {
+  function showUI(data, index) {
     const result = elementUI(data, index);
     content.insertAdjacentHTML('beforeend', result);
   }
@@ -132,15 +136,13 @@ window.addEventListener('DOMContentLoaded', () => {
   function editData(index) {
     btnSubmit.addEventListener('click', () => {
       if (modal.textContent.includes('edit')) {
-        const nameSites = inputNameSites.value.trim();
-        const urlSites = inputUrlSites.value.trim();
-        if (validate(nameSites, urlSites) == true) {
-          bookmarks[index].name = nameSites;
-          bookmarks[index].url = urlSites;
+        const data = getInputValues();
+        if (validate(data)) {
+          bookmarks[index] = data;
           saveBookmark();
           alerts('success', 'Bookmark has been updated!');
-          bookmarks = null, index = null;
           loadBookmark();
+          index = null;
         }
       }
     });
